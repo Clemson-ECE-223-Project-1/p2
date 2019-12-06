@@ -1,88 +1,76 @@
-/* event.c */
+/* event.h */
 
-#include "priority.h"
-#include "time.h"
-#include "randsim.h"
-#include "sim.h"
-#include "event.h"
-#include "queue.h"
-
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 
-static priority_t *q = NULL;
+#include "sim.h"
+#include "time.h"
+#include "event.h"  /* must come before priority.h */
+#include "priority.h"
 
-/* initializes events, creates a priority queue */
-void event_init(int MAX_PASS) {
-    if(q == NULL) {
-        q = priority_init(MAX_PASS);
-        if(q == NULL) {
-            printf("Cannot Intialize Event\n");
-        }
-    }
+static priority_t *p_queue = NULL;
+cmp_t compare = event_cmp;
+
+/* initializes events, creates a priority queue 
+   including the size of the queue */
+void event_init(int size)
+{
+    p_queue = priority_init(size, compare);
 }
 
-/* frees up all event space, including space in the priority queue */
-void event_fini() {
-    priority_finalize(q);
+/* frees up all event space, including space in the priority
+   queue */
+void event_finalize()
+{
+    priority_finalize(p_queue);
 }
 
 /* allocate a fresh event with empty fields */
-event_t *event_create() {
-    event_t *ev = (event_t *)malloc(sizeof(event_t));
-    ev->passenger = (passenger_t *)malloc(sizeof(passenger_t));
-
-    if(ev == NULL || ev->passenger == NULL)
+event_t *event_create()
+{
+    event_t *ev;
+    ev = (event_t *)malloc(sizeof(struct event_s));
+    if (ev)
     {
-        printf("Issue with your event/event passenger data.");
-        return NULL;
+        memset(ev, 0, sizeof(struct event_s));
     }
-    return ev;
+    return ev; // NULL on error
 }
 
 /* free an event */
-void event_destroy(event_t *e) {
-    free(e->passenger);
-    free(e->queue);
-    free(e);
+void event_destroy(event_t *ev)
+{
+    free(ev);
 }
 
 /* insert the event into the priority queue.  The key
    value is the current sim time plus the event_time in
    event.  Update the event time to the key value. */
-void event_schedule(event_t *e) {
-    double key_time = time_get();
-    e->event_time += key_time; 
-    priority_insert(q, e);
+void event_schedule(event_t *ev)
+{
+    ev->event_time += time_get();
+    priority_insert(p_queue, ev);
 }
 
-/* remove the next event from the priority and return it to the program for execution */
-event_t *event_cause() {
-    event_t *event = priority_remove(q);
-    if(event == NULL) {
-        printf("The queue is empty.");
-        return NULL;
-    }
-    time_set(event->event_time);
-    return event;
+/* returns 0 if there are more events in the event queue, and non zero
+   if there are no more events. */
+int event_empty()
+{
+    return priority_empty(p_queue);
 }
 
-// function to check if event is empty
-// returns 1 if empty, 0 if not
-int event_empty(event_t *e){
-    int isEmpty = -1;
-
-    if(e->queue == NULL){
-        isEmpty = 1;
-        // printf("Event Queue currently empty\n");
-    } else {
-        isEmpty = 0;
-    }
-    
-    return isEmpty;
+/* remove the next event from the priority queue, set the time to the event’s time, and then return it to the program for execution */
+event_t *event_cause()
+{
+    event_t *ev = (event_t *)priority_remove(p_queue);
+    time_set(ev->event_time);
+    return ev;  // NULL on error
 }
 
-// function to get the event's time
-double event_time(event_t *e) {
-   return e->event_time;
+/* returns true if *a is less than *b callback for priority queue */
+int event_cmp(event_t *a, event_t *b)
+{
+    return (a - b);
 }
