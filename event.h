@@ -9,7 +9,7 @@ typedef struct event_s event_t;
 struct event_s
 {
    int event_type;        /* type of event – see below */
-   // queue_t *queue      /* queue passenger is waiting in */
+   //int queue;             /* queue passenger is waiting in */
    double event_time;     /* sim time when event occurs */
    passenger_t *passenger;/* passenger related to this event */
 };

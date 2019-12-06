@@ -79,7 +79,7 @@ q_data_t *queue_remove(queue_t *q)
         if (q->tail == q->head)
         {
             q->tail = q->head = NULL;
-        }
+        } //something about a missing else
         q->head = q->head->link;
         q->numitems--;
         next_d = next->data;

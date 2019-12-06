@@ -11,13 +11,13 @@
 #include "priority.h"
 
 static priority_t *p_queue = NULL;
-cmp_t compare = event_cmp;
+cmp_t compare = (cmp_t)event_cmp; //look @
 
 /* initializes events, creates a priority queue 
    including the size of the queue */
 void event_init(int size)
 {
-    p_queue = priority_init(size, compare);
+    p_queue = priority_init(size, compare); //look @
 }
 
 /* frees up all event space, including space in the priority
@@ -51,7 +51,7 @@ void event_destroy(event_t *ev)
 void event_schedule(event_t *ev)
 {
     ev->event_time += time_get();
-    priority_insert(p_queue, ev);
+    priority_insert(p_queue, (p_data_t *)ev); //look @
 }
 
 /* returns 0 if there are more events in the event queue, and non zero
@@ -72,5 +72,5 @@ event_t *event_cause()
 /* returns true if *a is less than *b callback for priority queue */
 int event_cmp(event_t *a, event_t *b)
 {
-    return (a - b);
+    return (a < b); //look @
 }
