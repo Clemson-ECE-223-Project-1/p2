@@ -16,7 +16,7 @@ struct priority_s
 {
     int size;
     int count;
-    cmp_t cmp;              //cant access for some reason
+    cmp_t cmp;
     p_data_t *A[PRISIZE];
 };
 
@@ -32,7 +32,7 @@ priority_t *priority_init(int size, cmp_t cmp)
 {
     priority_t *pri = (priority_t *)malloc(sizeof(priority_t));
     memset(pri, 0, sizeof(priority_t));
-    pri->size = PRISIZE;                                        //what do we do here for compare
+    pri->size = PRISIZE;
     pri->count = 0;
     pri->cmp = cmp; 
     return pri;
@@ -75,7 +75,7 @@ p_data_t *priority_remove(priority_t *pri)
 {
     int current = 1;
     int child = 2;    /* 2 times current */
-
+    
     if (priority_empty(pri))
     {
         /* error - empty */
@@ -90,28 +90,18 @@ p_data_t *priority_remove(priority_t *pri)
     {
         if (child < pri->count)
         {
-            // printf("This is the value for cmp: %i", pri->cmp(pri->A[child + 1], pri->A[child]));
-
             if (pri->cmp(pri->A[child+1], pri->A[child]))
             {
-                // puts("this is a < b ");
-                // printf("%i is less than %i \n", pri->A[child+1], pri->A[child]);
-                // printf("This is the value for cmp: %i\n\n", pri->cmp(pri->A[child + 1], pri->A[child]));
                 child++;
             }
         }
         if (pri->cmp(pri->A[child], place))
         {
             pri->A[current] = place;
-            // puts("this is a > b ");
-            // printf("%i is less than %i \n", pri->A[child+1], pri->A[child]);
-            // printf("This is the value for cmp: %i\n\n", pri->cmp(pri->A[child + 1], pri->A[child]));
             return val;
         }
         else
         {
-            // printf("%i is less than %i \n", pri->A[child+1], pri->A[child]);
-            // printf("This is the value for cmp: %i\n\n", pri->cmp(pri->A[child + 1], pri->A[child]));
             pri->A[current] = pri->A[child];
             current = child;
             child = 2 * current;
@@ -143,4 +133,3 @@ void priority_finalize(priority_t *pri)
 {
     free(pri);
 }
-

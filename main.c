@@ -13,12 +13,13 @@
  
 // #define MAX_PASS 100
 int MAX_PASS = 100;
-#define MAX_SCAN 2
+#define MAX_SCAN 4
 #define QSZ 100 /* not used by queue.c */
 
 // static void parse_args(argc, argv);
 
 int num_passengers = 0; /* counts the number of passengers */
+static int scanQcount = 0;
 
 queue_t *airlineQ;
 queue_t *idQ;
@@ -149,12 +150,6 @@ int main(int argc, char **argv)
                 event_t *id_ev;
 
                 printf("passenger %d gets ID checked: %f\n", new_ev->passenger->pass_id, new_ev->event_time);
-
-                // scanQ
-                // int compareInt = 2;
-                // for(i = 0; i < MAX_SCAN; i++) {
-                
-                // }
                 
                 id_ev = event_create();
                 id_ev->passenger = new_ev->passenger;
@@ -170,8 +165,12 @@ int main(int argc, char **argv)
             case (EV_SCANQ) :
             {
                 event_t *scanQ_ev;
+
+                // scanQ line assignment
+                new_ev->queue = scanQcount%MAX_SCAN;
+                scanQcount++;
                 
-                printf("passenger %d enters scan line: %f\n", new_ev->passenger->pass_id, new_ev->event_time);
+                printf("passenger %d enters scan line #%d: %f\n", new_ev->passenger->pass_id, new_ev->queue, new_ev->event_time);
 
                 scanQ_ev = event_create();
                 scanQ_ev->passenger = new_ev->passenger;

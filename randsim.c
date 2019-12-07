@@ -63,4 +63,3 @@ double randsim_gauss(double mean, double std)
 	}
 	return u;
 }
-
